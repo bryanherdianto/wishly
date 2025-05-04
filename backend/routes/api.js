@@ -1,14 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const birthdayCardController = require("../controllers/birthdayCardController")
-const path = require("path")
 
-// Sample route for testing
-router.get("/test", (req, res) => {
-  res.json({ message: "API is working!" })
-})
-
-// Birthday card routes
 router.get("/birthday-cards", birthdayCardController.getBirthdayCards)
 router.post("/birthday-cards", birthdayCardController.uploadPhoto, birthdayCardController.createBirthdayCard)
 router.get("/birthday-cards/:id", birthdayCardController.getBirthdayCardById)

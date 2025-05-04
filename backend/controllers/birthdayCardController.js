@@ -3,11 +3,9 @@ const fs = require("fs")
 const path = require("path")
 const multer = require("multer")
 
-// Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, "../uploads")
-    // Create directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true })
     }
@@ -22,7 +20,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }, // file 5MB limit
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith("image/")) {
       cb(null, true)
@@ -32,7 +30,6 @@ const upload = multer({
   },
 })
 
-// Get all birthday cards
 exports.getBirthdayCards = async (req, res) => {
   try {
     const cards = await BirthdayCard.find().sort({ createdAt: -1 })
@@ -42,14 +39,11 @@ exports.getBirthdayCards = async (req, res) => {
   }
 }
 
-// Create a new birthday card
 exports.createBirthdayCard = async (req, res) => {
   try {
     const cardData = req.body
 
-    // If there's a file uploaded, add the URL
     if (req.file) {
-      // Create URL based on server configuration
       const baseUrl = `${req.protocol}://${req.get("host")}`
       cardData.photoUrl = `${baseUrl}/uploads/${req.file.filename}`
     }
@@ -62,7 +56,6 @@ exports.createBirthdayCard = async (req, res) => {
   }
 }
 
-// Get birthday card by ID
 exports.getBirthdayCardById = async (req, res) => {
   try {
     const card = await BirthdayCard.findById(req.params.id)
@@ -73,18 +66,14 @@ exports.getBirthdayCardById = async (req, res) => {
   }
 }
 
-// Update birthday card
 exports.updateBirthdayCard = async (req, res) => {
   try {
     const cardData = req.body
 
-    // If there's a file uploaded, add the URL
     if (req.file) {
-      // Create URL based on server configuration
       const baseUrl = `${req.protocol}://${req.get("host")}`
       cardData.photoUrl = `${baseUrl}/uploads/${req.file.filename}`
 
-      // Delete old photo if exists
       const oldCard = await BirthdayCard.findById(req.params.id)
       if (oldCard && oldCard.photoUrl) {
         const oldPhotoPath = oldCard.photoUrl.split("/uploads/")[1]
@@ -105,13 +94,11 @@ exports.updateBirthdayCard = async (req, res) => {
   }
 }
 
-// Delete birthday card
 exports.deleteBirthdayCard = async (req, res) => {
   try {
     const card = await BirthdayCard.findById(req.params.id)
     if (!card) return res.status(404).json({ message: "Birthday card not found" })
 
-    // Delete photo if exists
     if (card.photoUrl) {
       const photoPath = card.photoUrl.split("/uploads/")[1]
       if (photoPath) {
@@ -129,5 +116,4 @@ exports.deleteBirthdayCard = async (req, res) => {
   }
 }
 
-// Middleware for handling file uploads
 exports.uploadPhoto = upload.single("photo")

@@ -169,7 +169,6 @@ const Manage = () => {
                 Birthday Page Creator
             </h1>
             <div className="flex flex-col lg:flex-row gap-8">
-                {/* Form Section */}
                 <div className="w-full lg:w-1/2 bg-white p-6 rounded-xl shadow-md">
                     <h2 className="text-2xl font-semibold mb-6 text-pink-600">
                         {editingId ? "Edit Birthday Page" : "Create New Birthday Page"}
@@ -347,7 +346,6 @@ const Manage = () => {
                     </form>
                 </div>
 
-                {/* Cards Section */}
                 <div className="w-full lg:w-1/2">
                     <h2 className="text-2xl font-semibold mb-6 text-blue-600">Your Birthday Pages</h2>
 
@@ -377,14 +375,14 @@ const Manage = () => {
                                     <div
                                         key={card._id}
                                         className={`birthday-card p-6 rounded-xl relative group mb-4 shadow-md bg-white border-l-4 ${card.theme === "pink"
-                                                ? "border-pink-500"
-                                                : card.theme === "blue"
-                                                    ? "border-blue-500"
-                                                    : card.theme === "purple"
-                                                        ? "border-purple-500"
-                                                        : card.theme === "gold"
-                                                            ? "border-yellow-500"
-                                                            : "border-gradient-to-r from-red-500 via-yellow-500 to-blue-500"
+                                            ? "border-pink-500"
+                                            : card.theme === "blue"
+                                                ? "border-blue-500"
+                                                : card.theme === "purple"
+                                                    ? "border-purple-500"
+                                                    : card.theme === "gold"
+                                                        ? "border-yellow-500"
+                                                        : "border-gradient-to-r from-red-500 via-yellow-500 to-blue-500"
                                             }`}
                                     >
                                         <div className="flex justify-between items-start">

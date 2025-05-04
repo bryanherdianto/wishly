@@ -36,7 +36,6 @@ const Birthday: React.FC<BirthdayProps> = ({
   useEffect(() => {
     const fetchCard = async () => {
       if (!id) return
-      
       try {
         setLoading(true)
         const data = await birthdayCardService.getById(id)
@@ -52,7 +51,6 @@ const Birthday: React.FC<BirthdayProps> = ({
     fetchCard()
   }, [id])
 
-  // Calculate age from birthdate
   const calculateAge = (birthdate: string) => {
     const birth = new Date(birthdate)
     const today = new Date()
@@ -62,13 +60,11 @@ const Birthday: React.FC<BirthdayProps> = ({
     return age
   }
 
-  // Handle sharing the URL
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href)
     alert("Link copied to clipboard!")
   }
 
-  // Determine which values to use - from API or props
   const name = card?.name || propName
   const age = card ? (card.showAge ? calculateAge(card.birthdate) : undefined) : propAge
   const photoUrl = card?.photoUrl || propPhotoUrl
@@ -77,7 +73,6 @@ const Birthday: React.FC<BirthdayProps> = ({
   const style = card?.style || propStyle
   const message = card?.message || propMessage
 
-  // Theme colors
   const themeColors = {
     pink: {
       primary: "from-pink-300 to-pink-500",
@@ -111,16 +106,13 @@ const Birthday: React.FC<BirthdayProps> = ({
   useEffect(() => {
     if (!birthdayPageRef.current) return
 
-    // Clear any existing animations
     const existingBalloons = birthdayPageRef.current.querySelectorAll(".balloon")
     const existingConfetti = birthdayPageRef.current.querySelectorAll(".confetti-piece")
 
     existingBalloons.forEach((balloon) => balloon.remove())
     existingConfetti.forEach((confetti) => confetti.remove())
 
-    // Add animations based on style
     if (style === "balloons") {
-      // Add balloons
       const balloonColors = ["bg-red-500", "bg-yellow-400", "bg-blue-400", "bg-green-400", "bg-purple-400"]
       for (let i = 0; i < 20; i++) {
         const balloon = document.createElement("div")
@@ -139,7 +131,6 @@ const Birthday: React.FC<BirthdayProps> = ({
         birthdayPageRef.current.appendChild(balloon)
       }
     } else if (style === "confetti") {
-      // Add confetti
       const confettiColors = [
         "bg-red-500",
         "bg-yellow-400",
@@ -169,7 +160,6 @@ const Birthday: React.FC<BirthdayProps> = ({
       }
     }
 
-    // Make candles flicker
     const candles = document.querySelectorAll(".cake-candle")
     const interval = setInterval(() => {
       candles.forEach((candle) => {
@@ -181,7 +171,6 @@ const Birthday: React.FC<BirthdayProps> = ({
     return () => clearInterval(interval)
   }, [style])
 
-  // Show loading state if fetching data
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -193,7 +182,6 @@ const Birthday: React.FC<BirthdayProps> = ({
     )
   }
 
-  // Show error state if fetch failed
   if (id && (error || !card)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -213,7 +201,6 @@ const Birthday: React.FC<BirthdayProps> = ({
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      {/* Add navigation buttons only when accessed by URL with ID */}
       {id && (
         <div className="z-50 flex space-x-2 mb-2">
           <Link
@@ -277,7 +264,7 @@ const Birthday: React.FC<BirthdayProps> = ({
                 <source src={musicUrl} type="audio/mpeg" />
                 Your browser does not support the audio element.
               </audio>
-                <p className={currentTheme.secondary + " mt-2"}>Enjoy this festive birthday song!</p>
+              <p className={currentTheme.secondary + " mt-2"}>Enjoy this festive birthday song!</p>
             </div>
           )}
         </div>

@@ -1,9 +1,7 @@
 import axios from "axios"
 
-// Define the base URL for API requests
 const API_URL = "https://hbdgen.onrender.com/api"
 
-// Create axios instance with default config
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -24,21 +22,15 @@ export interface BirthdayCard {
   createdAt?: Date
 }
 
-// Birthday card service
 export const birthdayCardService = {
-  // Get all birthday cards
   getAll: async (): Promise<BirthdayCard[]> => {
     const response = await api.get("/birthday-cards")
     return response.data
   },
-
-  // Get birthday card by ID
   getById: async (id: string): Promise<BirthdayCard> => {
     const response = await api.get(`/birthday-cards/${id}`)
     return response.data
   },
-
-  // Create new birthday card
   create: async (card: FormData): Promise<BirthdayCard> => {
     const response = await axios.post(`${API_URL}/birthday-cards`, card, {
       headers: {
@@ -47,8 +39,6 @@ export const birthdayCardService = {
     })
     return response.data
   },
-
-  // Update birthday card
   update: async (id: string, card: FormData): Promise<BirthdayCard> => {
     const response = await axios.put(`${API_URL}/birthday-cards/${id}`, card, {
       headers: {
@@ -57,8 +47,6 @@ export const birthdayCardService = {
     })
     return response.data
   },
-
-  // Delete birthday card
   delete: async (id: string): Promise<void> => {
     await api.delete(`/birthday-cards/${id}`)
   },

@@ -16,23 +16,28 @@ export interface BirthdayCard {
 	userId?: string;
 	firstname: string;
 	lastname: string;
+	style: string;
+	slug?: string;
 	music: string;
 	cards: {
 		title: string;
 		message: string;
 	}[];
-	createdAt?: Date;
+	createdAt?: string;
 }
 
 export interface ValentineCard {
 	_id?: string;
+	userId?: string;
 	nickname: string;
+	style: string;
+	slug?: string;
 	music: string;
-	card: {
+	cards: {
 		title: string;
 		message: string;
-	};
-	createdAt?: Date;
+	}[];
+	createdAt?: string;
 }
 
 export const setApiToken = (token: string | null) => {
@@ -48,20 +53,20 @@ export const birthdayCardService = {
 		const response = await api.get("/birthday/cards");
 		return response.data;
 	},
-	getById: async (id: string): Promise<BirthdayCard> => {
-		const response = await api.get(`/birthday/cards/${id}`);
+	getBySlug: async (slug: string): Promise<BirthdayCard> => {
+		const response = await api.get(`/birthday/slug/${slug}`);
 		return response.data;
 	},
 	create: async (card: Omit<BirthdayCard, "_id">): Promise<BirthdayCard> => {
 		const response = await api.post("/birthday/cards", card);
 		return response.data;
 	},
-	update: async (id: string, card: Partial<BirthdayCard>): Promise<BirthdayCard> => {
-		const response = await api.put(`/birthday/cards/${id}`, card);
+	update: async (slug: string, card: Partial<BirthdayCard>): Promise<BirthdayCard> => {
+		const response = await api.put(`/birthday/cards/${slug}`, card);
 		return response.data;
 	},
-	delete: async (id: string): Promise<void> => {
-		await api.delete(`/birthday/cards/${id}`);
+	delete: async (slug: string): Promise<void> => {
+		await api.delete(`/birthday/cards/${slug}`);
 	},
 };
 
@@ -70,20 +75,20 @@ export const valentineCardService = {
 		const response = await api.get("/valentine/cards");
 		return response.data;
 	},
-	getById: async (id: string): Promise<ValentineCard> => {
-		const response = await api.get(`/valentine/cards/${id}`);
+	getBySlug: async (slug: string): Promise<ValentineCard> => {
+		const response = await api.get(`/valentine/slug/${slug}`);
 		return response.data;
 	},
 	create: async (card: Omit<ValentineCard, "_id">): Promise<ValentineCard> => {
 		const response = await api.post("/valentine/cards", card);
 		return response.data;
 	},
-	update: async (id: string, card: Partial<ValentineCard>): Promise<ValentineCard> => {
-		const response = await api.put(`/valentine/cards/${id}`, card);
+	update: async (slug: string, card: Partial<ValentineCard>): Promise<ValentineCard> => {
+		const response = await api.put(`/valentine/cards/${slug}`, card);
 		return response.data;
 	},
-	delete: async (id: string): Promise<void> => {
-		await api.delete(`/valentine/cards/${id}`);
+	delete: async (slug: string): Promise<void> => {
+		await api.delete(`/valentine/cards/${slug}`);
 	},
 };
 

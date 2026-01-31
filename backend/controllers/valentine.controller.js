@@ -2,7 +2,7 @@ const Valentine = require("../models/valentine.model");
 
 exports.getValentines = async (req, res) => {
 	try {
-		const cards = await Valentine.find().sort({
+		const cards = await Valentine.find({ userId: req.auth().userId }).sort({
 			createdAt: -1,
 		});
 		res.json(cards);
@@ -13,11 +13,25 @@ exports.getValentines = async (req, res) => {
 
 exports.createValentine = async (req, res) => {
 	try {
-		const newCard = new Valentine(req.body);
+		const newCard = new Valentine({
+			...req.body,
+			userId: req.auth().userId,
+		});
 		const savedCard = await newCard.save();
 		res.status(201).json(savedCard);
 	} catch (error) {
 		res.status(400).json({ message: error.message });
+	}
+};
+
+exports.getValentineBySlug = async (req, res) => {
+	try {
+		const card = await Valentine.findOne({ slug: req.params.slug });
+		if (!card)
+			return res.status(404).json({ message: "Valentine card not found" });
+		res.json(card);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
 	}
 };
 

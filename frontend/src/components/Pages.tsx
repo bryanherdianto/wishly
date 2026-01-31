@@ -62,7 +62,7 @@ function Pages() {
 							{birthdays.map((card) => (
 								<Link
 									key={card._id}
-									to={`/surprise/${card._id}`}
+									to={`/birthday/${card.slug}`}
 									className="group bg-white border border-stone-200 rounded-2xl overflow-hidden hover:border-blue-400 transition-colors duration-300"
 								>
 									<div className="p-6">
@@ -114,7 +114,7 @@ function Pages() {
 							{valentines.map((card) => (
 								<Link
 									key={card._id}
-									to={`/valentine/${card._id}`}
+									to={`/valentine/${card.slug}`}
 									className="group bg-white border border-stone-200 rounded-2xl overflow-hidden hover:border-blue-400 transition-colors duration-300"
 								>
 									<div className="p-6">
@@ -130,7 +130,7 @@ function Pages() {
 											For {card.nickname}
 										</h3>
 										<p className="text-sm text-stone-500 line-clamp-2">
-											{card.card.message}
+											{card.cards[0]?.message}
 										</p>
 									</div>
 								</Link>

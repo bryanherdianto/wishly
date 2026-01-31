@@ -1,7 +1,11 @@
 import { SignedIn, SignedOut, useAuth } from "@clerk/clerk-react";
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { birthdayCardService, setApiToken } from "../services/api";
+import {
+	birthdayCardService,
+	valentineCardService,
+	setApiToken,
+} from "../services/api";
 
 const ImageSlider = ({
 	images,
@@ -85,6 +89,7 @@ function Create() {
 		lastName: "",
 		cards: [{ title: "", message: "" }],
 		music: "none",
+		style: "card-stack", // Default style
 	});
 
 	const musicOptions = [
@@ -191,18 +196,29 @@ function Create() {
 			const token = await getToken();
 			setApiToken(token);
 
-			const payload = {
-				firstname: formData.firstName,
-				lastname: formData.lastName,
-				music: formData.music,
-				cards: formData.cards,
-			};
-
-			const response = await birthdayCardService.create(payload);
-			// Navigate to the newly created surprise page
-			navigate(`/surprise/${response._id}`);
+			let response;
+			if (formData.style === "simple-valentine") {
+				const payload = {
+					nickname: formData.firstName, // Using firstName as nickname for Valentine
+					music: formData.music === "none" ? "none" : "romantic-love", // Default mapping for valentine music
+					style: formData.style,
+					cards: formData.cards,
+				};
+				response = await valentineCardService.create(payload);
+				navigate(`/valentine/${response.slug}`);
+			} else {
+				const payload = {
+					firstname: formData.firstName,
+					lastname: formData.lastName,
+					music: formData.music,
+					style: formData.style,
+					cards: formData.cards,
+				};
+				response = await birthdayCardService.create(payload);
+				navigate(`/birthday/${response.slug}`);
+			}
 		} catch (error) {
-			console.error("Error creating birthday card:", error);
+			console.error("Error creating card:", error);
 			alert("Failed to create the surprise. Please try again.");
 		} finally {
 			setIsSubmitting(false);
@@ -256,30 +272,54 @@ function Create() {
 								Birthday
 							</h2>
 							<div className="mb-12 grid grid-cols-2 gap-4">
-								<div>
+								<button
+									onClick={() => setFormData({ ...formData, style: "card-stack" })}
+									className={`relative group rounded-2xl overflow-hidden border-4 transition-all ${
+										formData.style === "card-stack"
+											? "border-blue-500 shadow-xl"
+											: "border-transparent"
+									}`}
+								>
 									<ImageSlider
 										images={cardStackImages}
 										link="/templates/card-stack"
 									/>
-								</div>
-								<div>
+									<div className="p-2 bg-white text-center font-bold">Card Stack</div>
+								</button>
+								<button
+									onClick={() => setFormData({ ...formData, style: "sticky-pixel" })}
+									className={`relative group rounded-2xl overflow-hidden border-4 transition-all ${
+										formData.style === "sticky-pixel"
+											? "border-blue-500 shadow-xl"
+											: "border-transparent"
+									}`}
+								>
 									<ImageSlider
 										images={stickyPixelImages}
 										link="/templates/sticky-pixel"
 									/>
-								</div>
+									<div className="p-2 bg-white text-center font-bold">Sticky Pixel</div>
+								</button>
 							</div>
 
 							<h2 className="text-3xl font-semibold tracking-tight mb-2">
 								Valentine
 							</h2>
 							<div className="mb-12 grid grid-cols-2 gap-4">
-								<div>
+								<button
+									onClick={() => setFormData({ ...formData, style: "simple-valentine" })}
+									className={`relative group rounded-2xl overflow-hidden border-4 transition-all ${
+										formData.style === "simple-valentine"
+											? "border-blue-500 shadow-xl"
+											: "border-transparent"
+									}`}
+								>
 									<ImageSlider
 										images={simpleValentineImages}
 										link="/templates/simple-valentine"
 									/>
-								</div>
+									<div className="p-2 bg-white text-center font-bold">Simple Valentine</div>
+								</button>
 							</div>
 						</>
 					)}
@@ -339,9 +379,7 @@ function Create() {
 										placeholder="Card Title (e.g. To my Bestie)"
 										className="w-full px-4 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-stone-600 placeholder:text-stone-400 bg-white"
 										value={card.title}
-										onChange={(e) =>
-											updateCard(index, "title", e.target.value)
-										}
+										onChange={(e) => updateCard(index, "title", e.target.value)}
 									/>
 									<textarea
 										placeholder={`Enter message for card ${index + 1}`}

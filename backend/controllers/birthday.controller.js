@@ -2,7 +2,7 @@ const Birthday = require("../models/birthday.model");
 
 exports.getBirthdays = async (req, res) => {
 	try {
-		const cards = await Birthday.find({ userId: req.auth.userId }).sort({
+		const cards = await Birthday.find({ userId: req.auth().userId }).sort({
 			createdAt: -1,
 		});
 		res.json(cards);
@@ -11,9 +11,20 @@ exports.getBirthdays = async (req, res) => {
 	}
 };
 
+exports.getBirthdayBySlug = async (req, res) => {
+	try {
+		const card = await Birthday.findOne({ slug: req.params.slug });
+		if (!card)
+			return res.status(404).json({ message: "Birthday card not found" });
+		res.json(card);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
 exports.createBirthday = async (req, res) => {
 	try {
-		const newCard = new Birthday({ ...req.body, userId: req.auth.userId });
+		const newCard = new Birthday({ ...req.body, userId: req.auth().userId });
 		const savedCard = await newCard.save();
 		res.status(201).json(savedCard);
 	} catch (error) {

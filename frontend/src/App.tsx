@@ -12,7 +12,8 @@ import NotFound from "./components/NotFound";
 function App() {
 	const location = useLocation();
 	const isImmersive =
-		location.pathname.startsWith("/pages/") ||
+		location.pathname.startsWith("/birthday/") ||
+		location.pathname.startsWith("/valentine/") ||
 		location.pathname.startsWith("/templates/");
 
 	return (
@@ -76,12 +77,13 @@ function App() {
 					<Route path="/" element={<Home />} />
 					<Route path="/create" element={<Create />} />
 					<Route path="/pages" element={<Pages />} />
-					<Route path="/pages/:id" element={<SharedPage />} />
-					<Route path="/templates/card-stack" element={<CardStack />} />
-					<Route path="/templates/sticky-pixel" element={<StickyPixel />} />
+					<Route path="/birthday/:slug" element={<SharedPage />} />
+					<Route path="/valentine/:slug" element={<SharedPage />} />
+					<Route path="/templates/card-stack" element={<CardStack data={null} />} />
+					<Route path="/templates/sticky-pixel" element={<StickyPixel data={null} />} />
 					<Route
 						path="/templates/simple-valentine"
-						element={<SimpleValentine />}
+						element={<SimpleValentine data={null} />}
 					/>
 					<Route
 						path="/sign-in/*"

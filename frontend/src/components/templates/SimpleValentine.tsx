@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const message = "Meet me at our favorite spot this weekend! 🥰";
 
-function SimpleValentine() {
+function SimpleValentine({ data }: { data: any }) {
 	const [isAccepted, setIsAccepted] = useState(false);
 	const [noButtonPosition, setNoButtonPosition] = useState<{
 		x: number;
@@ -19,14 +19,16 @@ function SimpleValentine() {
 		);
 	};
 
+	if (!data) return null;
+
 	if (isAccepted) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-screen bg-rose-50 font-pacifico gap-8 p-4 text-center">
-				<h1 className="text-4xl md:text-6xl text-rose-600 mb-5">
-					Yey, thank you! ❤️
+				<h1 className="text-4xl md:text-6xl text-rose-600 mb-5 text-balance">
+					{data.cards[1]?.title || "Yey, thank you! ❤️"}
 				</h1>
-				<div className="text-rose-500 font-lato font-semibold text-lg md:text-xl">
-					{message}
+				<div className="text-rose-500 font-lato font-semibold text-lg md:text-xl max-w-md">
+					{data.cards[1]?.message || "I'm so happy!"}
 				</div>
 				<img
 					src="/kitty-heart.gif"
@@ -39,11 +41,15 @@ function SimpleValentine() {
 
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen bg-rose-50 font-pacifico gap-8 p-4 text-center">
-			<h1 className="text-4xl md:text-6xl text-rose-600">
-				Will you be my Valentine?
+			<h1 className="text-4xl md:text-6xl text-rose-600 text-balance">
+				{data.cards[0]?.title || "Will you be my Valentine?"}
 			</h1>
 
-			<div className="w-48 h-48 md:w-64 md:h-64 flex items-center justify-center">
+			<div className="text-rose-500 font-lato font-semibold text-lg md:text-xl max-w-md">
+				{data.cards[0]?.message}
+			</div>
+
+			<div className="w-48 h-48 md:w-64 md:h-64 flex items-center justify-center text-balance px-4 text-center py-4">
 				<img
 					src={currentImg}
 					alt="Valentine Heart"

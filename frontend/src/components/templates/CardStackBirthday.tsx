@@ -2,21 +2,13 @@ import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import BirthdayCake from "../BirthdayCake";
 
-const cards = [
-	{ id: 1, color: "bg-blue-500", title: "Card 1", message: "Happy Birthday!" },
-	{
-		id: 2,
-		color: "bg-purple-500",
-		title: "Card 2",
-		message: "Wishing you all the best!",
-	},
-	{
-		id: 3,
-		color: "bg-red-500",
-		title: "Card 3",
-		message: "Have a fantastic day!",
-	},
-	{ id: 4, color: "bg-green-500", title: "Card 4", message: "Cheers to you!" },
+const colors = [
+	"bg-blue-500",
+	"bg-purple-500",
+	"bg-red-500",
+	"bg-green-500",
+	"bg-pink-500",
+	"bg-orange-500",
 ];
 
 const Card = ({ card, index, targetScale }: any) => {
@@ -41,7 +33,9 @@ const Card = ({ card, index, targetScale }: any) => {
 					scale,
 					rotate: index % 2 === 0 ? -5 : 5,
 				}}
-				className={`relative w-[80vw] max-w-lg h-[500px] rounded-3xl p-10 origin-top border border-white/20 shadow-2xl ${card.color}`}
+				className={`relative w-[80vw] max-w-lg h-[500px] rounded-3xl p-10 origin-top border border-white/20 shadow-2xl ${
+					colors[index % colors.length]
+				}`}
 			>
 				<h2 className="text-4xl font-bold text-white font-caveat">
 					{card.title}
@@ -54,27 +48,28 @@ const Card = ({ card, index, targetScale }: any) => {
 	);
 };
 
-export default function CardStack() {
+export default function CardStack({ data }: { data: any }) {
+	if (!data) return null;
+
 	return (
 		<>
 			<div className="min-h-screen pb-40">
-				{cards.map((card, i) => {
-					const targetScale = 1 - (cards.length - i) * 0.05;
+				{data.cards.map((card: any, i: number) => {
+					const targetScale = 1 - (data.cards.length - i) * 0.05;
 					return (
 						<Card
-							key={card.id}
+							key={i}
 							index={i}
 							card={card}
-							range={[i * 0.25, 1]}
 							targetScale={targetScale}
 						/>
 					);
 				})}
 			</div>
 			<div className="text-7xl font-bold font-caveat text-center pb-40">
-				Happy Birthday!
+				Happy Birthday {data.firstname}!
 			</div>
-			<BirthdayCake />
+			<BirthdayCake name={data.firstname} />
 		</>
 	);
 }

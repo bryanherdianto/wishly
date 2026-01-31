@@ -1,70 +1,35 @@
 import { motion } from "motion/react";
 import { ReactNode } from "react";
 
-const cards = [
-	{
-		id: 1,
-		color: "bg-blue-600",
-		title: "Hey You!",
-		message: "Stop scrolling for a sec...",
-		textColor: "text-blue-100",
-	},
-	{
-		id: 2,
-		color: "bg-purple-600",
-		title: "Special Day",
-		message: "I heard something special is happening.",
-		textColor: "text-purple-100",
-	},
-	{
-		id: 3,
-		color: "bg-amber-600",
-		title: "Almost there...",
-		message: "Just one more swipe.",
-		textColor: "text-amber-100",
-	},
+const colors = [
+	{ bg: "bg-blue-600", text: "text-blue-100" },
+	{ bg: "bg-purple-600", text: "text-purple-100" },
+	{ bg: "bg-amber-600", text: "text-amber-100" },
+	{ bg: "bg-green-600", text: "text-green-100" },
+	{ bg: "bg-rose-600", text: "text-rose-100" },
 ];
 
-interface CardData {
-	id: number | string;
-	color: string;
-	title: string;
-	message: string;
-	textColor?: string;
-	component?: ReactNode;
-}
-
 interface CardProps {
-	card: CardData;
+	card: any;
 	index: number;
 }
 
-const FINAL_CARD: CardData = {
-	id: "final-cake-card",
-	color: "bg-rose-600",
-	title: "Happy Birthday!",
-	message: "Wishing you all the best.",
-	textColor: "text-rose-100",
-	component: <div className="cake" id="cake"></div>,
-};
-
-const Card = ({ card }: CardProps) => {
+const Card = ({ card, index }: CardProps) => {
+	const color = colors[index % colors.length];
 	return (
 		<div className="h-screen w-full snap-start snap-always relative">
 			<div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
 				<motion.div
-					className={`relative w-full h-full flex flex-col items-center shadow-2xl ${card.color} ${
-						card.component ? "justify-start pt-6" : "justify-center"
-					}`}
+					className={`relative w-full h-full flex flex-col items-center shadow-2xl justify-center ${color.bg}`}
 				>
 					<div className="text-center px-10 max-w-4xl z-10">
 						<h2
-							className={`text-6xl md:text-8xl font-bold font-pixelify-sans mb-8 ${card.textColor || "text-white"}`}
+							className={`text-6xl md:text-8xl font-bold font-pixelify-sans mb-8 ${color.text}`}
 						>
 							{card.title}
 						</h2>
 						<p
-							className={`text-4xl md:text-6xl font-pixelify-sans opacity-90 leading-tight ${card.textColor || "text-white"}`}
+							className={`text-4xl md:text-6xl font-pixelify-sans opacity-90 leading-tight ${color.text}`}
 						>
 							{card.message}
 						</p>
@@ -76,17 +41,29 @@ const Card = ({ card }: CardProps) => {
 	);
 };
 
-export default function StickyPixel({
-	userCards = cards,
-}: {
-	userCards?: CardData[];
-}) {
-	const allCards = [...userCards, FINAL_CARD];
+export default function StickyPixel({ data }: { data: any }) {
+	if (!data) return null;
+
+	const allCards = [
+		...data.cards,
+		{
+			title: `Happy Birthday ${data.firstname}!`,
+			message: "Wishing you all the best.",
+			component: (
+				<div className="flex flex-col items-center mt-8">
+					<div className="cake" id="cake"></div>
+					<p className="text-4xl text-rose-100 font-pixelify-sans mt-4">
+						Tap the cake!
+					</p>
+				</div>
+			),
+		},
+	];
 
 	return (
-		<div className="h-screen w-full overflow-y-scroll snap-y snap-mandatory scroll-smooth">
+		<div className="h-screen w-full overflow-y-scroll snap-y snap-mandatory scroll-smooth bg-black">
 			{allCards.map((card, i) => {
-				return <Card key={card.id} index={i} card={card} />;
+				return <Card key={i} index={i} card={card} />;
 			})}
 		</div>
 	);

@@ -105,3 +105,7 @@ VITE_API_URL=your_backend_api_url
 4. **Music**: Select a background track that fits the vibe (and preview it live).
 5. **Generate**: Create your page; the system will auto-generate a screenshot preview.
 6. **Share**: Send the link to your special someone and wait for their reaction!
+
+## Why Clerk Production, not Dev?
+
+Clerk's production environment is used to ensure that all authentication features work seamlessly in a live setting. Features include branded customization, seamless scaling for users, and trusted security measures that are essential for a public-facing application like Wishly. Using the production environment helps to avoid potential limitations and restrictions present in the development environment, ensuring a smooth user experience.

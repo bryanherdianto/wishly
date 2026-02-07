@@ -36,20 +36,18 @@ const ValentineSchema = new mongoose.Schema({
 		],
 		default: "none",
 	},
-	cards: [
-		{
-			title: {
-				type: String,
-				required: true,
-				trim: true,
-			},
-			message: {
-				type: String,
-				required: true,
-				trim: true,
-			},
+	card: {
+		title: {
+			type: String,
+			required: true,
+			trim: true,
 		},
-	],
+		message: {
+			type: String,
+			required: true,
+			trim: true,
+		},
+	},
 	createdAt: {
 		type: Date,
 		default: Date.now,

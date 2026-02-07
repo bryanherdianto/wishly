@@ -7,20 +7,25 @@ import {
 	aiService,
 	setApiToken,
 } from "../services/api";
+import Modal from "./Modal";
 
 const ImageSlider = ({
 	images,
 	link,
+	isActive,
+	title,
 }: {
 	images: { src: string; alt: string }[];
 	link: string;
+	isActive: boolean;
+	title?: string;
 }) => {
 	const [currentIndex, setCurrentIndex] = useState(0);
 
 	return (
-		<div className="flex flex-col items-center gap-3 w-full max-w-2xl mx-auto">
+		<div className="flex flex-col items-center gap-1 w-full max-w-2xl mx-auto">
 			{/* Image Container */}
-			<div className="relative w-full aspect-video overflow-hidden rounded-2xl border border-stone-200 bg-white">
+			<div className="relative w-full aspect-video overflow-hidden rounded-2xl bg-white">
 				<div
 					className="flex transition-transform duration-500 ease-out h-full"
 					style={{ transform: `translateX(-${currentIndex * 100}%)` }}
@@ -35,6 +40,13 @@ const ImageSlider = ({
 						</div>
 					))}
 				</div>
+
+				{/* Selection Border Overlay */}
+				<div
+					className={`absolute inset-0 rounded-2xl pointer-events-none transition-all duration-300 ${
+						isActive ? "ring-4 ring-inset ring-blue-500" : ""
+					}`}
+				/>
 
 				{/* Preview Button */}
 				<Link
@@ -51,7 +63,7 @@ const ImageSlider = ({
 						strokeWidth="2"
 						strokeLinecap="round"
 						strokeLinejoin="round"
-						className="text-stone-700 group-hover:scale-110 duration-200"
+						className="text-stone-700 hover:scale-110 duration-200"
 					>
 						<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
 						<circle cx="12" cy="12" r="3" />
@@ -59,20 +71,24 @@ const ImageSlider = ({
 				</Link>
 			</div>
 
-			{/* Dot Indicators */}
-			<div className="flex gap-1">
-				{images.map((_, idx) => (
-					<button
-						key={idx}
-						onClick={() => setCurrentIndex(idx)}
-						className={`h-2 w-2 rounded-full duration-500 transition-all ${
-							currentIndex === idx
-								? "bg-blue-600 w-6"
-								: "bg-stone-300 hover:bg-stone-400"
-						}`}
-						aria-label={`Go to slide ${idx + 1}`}
-					/>
-				))}
+			<div className="flex justify-between items-center w-full px-4">
+				{/* Title */}
+				<div className="bg-white text-center font-bold">{title}</div>
+				{/* Dot Indicators */}
+				<div className="flex gap-1">
+					{images.map((_, idx) => (
+						<button
+							key={idx}
+							onClick={() => setCurrentIndex(idx)}
+							className={`h-2 w-2 rounded-full duration-500 transition-all ${
+								currentIndex === idx
+									? "bg-blue-600 w-6"
+									: "bg-stone-300 hover:bg-stone-400"
+							}`}
+							aria-label={`Go to slide ${idx + 1}`}
+						/>
+					))}
+				</div>
 			</div>
 		</div>
 	);
@@ -98,7 +114,13 @@ function Create() {
 		field: "title" | "message";
 	} | null>(null);
 
-	const musicOptions = [
+	const [modalConfig, setModalConfig] = useState<{
+		isOpen: boolean;
+		index: number;
+		field: "title" | "message";
+	}>({ isOpen: false, index: 0, field: "title" });
+
+	const birthdayMusics = [
 		{
 			id: "none",
 			title: "No Music",
@@ -143,6 +165,39 @@ function Create() {
 		},
 	];
 
+	const valentineMusics = [
+		{
+			id: "none",
+			title: "No Music",
+			icon: "🔇",
+			description: "Silence is golden",
+		},
+		{
+			id: "field-grass",
+			title: "Field Grass",
+			icon: "🌿",
+			description: "Calm and peaceful outdoor vibes",
+		},
+		{
+			id: "romantic-hopeful",
+			title: "Romantic Hopeful",
+			icon: "✨",
+			description: "Sweet and optimistic melodies",
+		},
+		{
+			id: "romantic-love",
+			title: "Romantic Love",
+			icon: "❤️",
+			description: "Deeply romantic and passionate",
+		},
+		{
+			id: "romantic-wedding",
+			title: "Romantic Wedding",
+			icon: "💍",
+			description: "Classic and elegant love theme",
+		},
+	];
+
 	const playMusic = (musicId: string) => {
 		if (audioRef.current) {
 			audioRef.current.pause();
@@ -150,7 +205,7 @@ function Create() {
 		}
 
 		if (musicId !== "none") {
-			const audio = new Audio(`/birthday/${musicId}.mp3`);
+			const audio = new Audio(`/musics/${musicId}.mp3`);
 			audio
 				.play()
 				.catch((err) => console.log("Audio playback prevented:", err));
@@ -196,14 +251,13 @@ function Create() {
 		}
 	};
 
-	const handleAIGenerate = async (
-		index: number,
-		field: "title" | "message",
-	) => {
-		const prompt = window.prompt(
-			`What theme or vibe should the AI use for this ${field}? (e.g. funny, emotional, inside joke about pizza...)`,
-		);
-		if (!prompt) return;
+	const handleAIGenerate = (index: number, field: "title" | "message") => {
+		setModalConfig({ isOpen: true, index, field });
+	};
+
+	const handleModalSubmit = async (prompt: string) => {
+		const { index, field } = modalConfig;
+		setModalConfig({ ...modalConfig, isOpen: false });
 
 		try {
 			setAiLoading({ index, field });
@@ -233,9 +287,9 @@ function Create() {
 			if (formData.style === "simple-valentine") {
 				const payload = {
 					nickname: formData.firstName, // Using firstName as nickname for Valentine
-					music: formData.music === "none" ? "none" : "romantic-love", // Default mapping for valentine music
+					music: formData.music,
 					style: formData.style,
-					cards: formData.cards,
+					card: formData.cards[0], // Only one card for Valentine
 				};
 				response = await valentineCardService.create(payload);
 				navigate(`/valentine/${response.slug}`);
@@ -276,6 +330,14 @@ function Create() {
 	return (
 		<>
 			<SignedIn>
+				<Modal
+					isOpen={modalConfig.isOpen}
+					onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+					onSubmit={handleModalSubmit}
+					title="Generate with AI"
+					description={`What theme or vibe should the AI use for this ${modalConfig.field}?`}
+					placeholder="e.g. funny, emotional, inside joke about pizza..."
+				/>
 				<div className="max-w-7xl mx-auto">
 					<div className="relative w-full py-12 text-center mb-8 overflow-hidden rounded-3xl">
 						<img
@@ -306,32 +368,28 @@ function Create() {
 							</h2>
 							<div className="mb-12 grid grid-cols-2 gap-4">
 								<button
-									onClick={() => setFormData({ ...formData, style: "card-stack" })}
-									className={`relative group rounded-2xl overflow-hidden border-4 transition-all ${
-										formData.style === "card-stack"
-											? "border-blue-500 shadow-xl"
-											: "border-transparent"
-									}`}
+									onClick={() =>
+										setFormData({ ...formData, style: "card-stack" })
+									}
 								>
 									<ImageSlider
 										images={cardStackImages}
 										link="/templates/card-stack"
+										isActive={formData.style === "card-stack"}
+										title="Card Stack"
 									/>
-									<div className="p-2 bg-white text-center font-bold">Card Stack</div>
 								</button>
 								<button
-									onClick={() => setFormData({ ...formData, style: "sticky-pixel" })}
-									className={`relative group rounded-2xl overflow-hidden border-4 transition-all ${
-										formData.style === "sticky-pixel"
-											? "border-blue-500 shadow-xl"
-											: "border-transparent"
-									}`}
+									onClick={() =>
+										setFormData({ ...formData, style: "sticky-pixel" })
+									}
 								>
 									<ImageSlider
 										images={stickyPixelImages}
 										link="/templates/sticky-pixel"
+										isActive={formData.style === "sticky-pixel"}
+										title="Sticky Pixel"
 									/>
-									<div className="p-2 bg-white text-center font-bold">Sticky Pixel</div>
 								</button>
 							</div>
 
@@ -340,18 +398,16 @@ function Create() {
 							</h2>
 							<div className="mb-12 grid grid-cols-2 gap-4">
 								<button
-									onClick={() => setFormData({ ...formData, style: "simple-valentine" })}
-									className={`relative group rounded-2xl overflow-hidden border-4 transition-all ${
-										formData.style === "simple-valentine"
-											? "border-blue-500 shadow-xl"
-											: "border-transparent"
-									}`}
+									onClick={() =>
+										setFormData({ ...formData, style: "simple-valentine" })
+									}
 								>
 									<ImageSlider
 										images={simpleValentineImages}
 										link="/templates/simple-valentine"
+										isActive={formData.style === "simple-valentine"}
+										title="Simple Valentine"
 									/>
-									<div className="p-2 bg-white text-center font-bold">Simple Valentine</div>
 								</button>
 							</div>
 						</>
@@ -362,12 +418,18 @@ function Create() {
 								<div className="flex-1">
 									<div className="flex justify-between items-center mb-2">
 										<label className="text-lg font-semibold text-stone-900">
-											First name
+											{formData.style === "simple-valentine"
+												? "Nickname"
+												: "First name"}
 										</label>
 									</div>
 									<input
 										type="text"
-										placeholder="Enter first name"
+										placeholder={
+											formData.style === "simple-valentine"
+												? "Enter nickname"
+												: "Enter first name"
+										}
 										className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-stone-600 placeholder:text-stone-400 bg-white"
 										value={formData.firstName}
 										onChange={(e) =>
@@ -375,33 +437,37 @@ function Create() {
 										}
 									/>
 								</div>
-								<div className="flex-1">
-									<div className="flex justify-between items-center mb-2">
-										<label className="text-lg font-semibold text-stone-900">
-											Last name
-										</label>
+								{formData.style !== "simple-valentine" && (
+									<div className="flex-1">
+										<div className="flex justify-between items-center mb-2">
+											<label className="text-lg font-semibold text-stone-900">
+												Last name
+											</label>
+										</div>
+										<input
+											type="text"
+											placeholder="Enter last name"
+											className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-stone-600 placeholder:text-stone-400 bg-white"
+											value={formData.lastName}
+											onChange={(e) =>
+												setFormData({ ...formData, lastName: e.target.value })
+											}
+										/>
 									</div>
-									<input
-										type="text"
-										placeholder="Enter last name"
-										className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-stone-600 placeholder:text-stone-400 bg-white"
-										value={formData.lastName}
-										onChange={(e) =>
-											setFormData({ ...formData, lastName: e.target.value })
-										}
-									/>
-								</div>
+								)}
 							</div>
 							{formData.cards.map((card, index) => (
 								<div key={index} className="w-full flex flex-col gap-3">
-									<div className="flex justify-between items-center mb-1">
+									<div className="flex justify-between items-end mb-1">
 										<label className="text-lg font-semibold text-stone-900">
-											Card {index + 1}
+											{formData.style === "simple-valentine"
+												? "Accepted Message"
+												: `Card ${index + 1}`}
 										</label>
 										{formData.cards.length > 1 && (
 											<button
 												onClick={() => removeCard(index)}
-												className="text-xs text-red-500 hover:text-red-700 font-medium"
+												className="text-xs text-stone-400 hover:text-blue-600 font-medium transition-colors cursor-pointer"
 											>
 												Remove
 											</button>
@@ -410,18 +476,25 @@ function Create() {
 									<div className="relative group/field">
 										<input
 											type="text"
-											placeholder="Card Title (e.g. To my Bestie)"
+											placeholder={
+												formData.style === "simple-valentine"
+													? "Title"
+													: "Card Title (e.g. Happy Birthday!)"
+											}
 											className="w-full px-4 py-2 pr-10 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-stone-600 placeholder:text-stone-400 bg-white"
 											value={card.title}
-											onChange={(e) => updateCard(index, "title", e.target.value)}
+											onChange={(e) =>
+												updateCard(index, "title", e.target.value)
+											}
 										/>
 										<button
 											onClick={() => handleAIGenerate(index, "title")}
 											disabled={aiLoading !== null}
-											className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-blue-500 transition-colors p-1"
+											className="absolute right-3 top-2 text-stone-400 hover:text-blue-500 transition-colors p-1"
 											title="Generate with AI"
 										>
-											{aiLoading?.index === index && aiLoading?.field === "title" ? (
+											{aiLoading?.index === index &&
+											aiLoading?.field === "title" ? (
 												<div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
 											) : (
 												<svg
@@ -442,7 +515,11 @@ function Create() {
 									</div>
 									<div className="relative group/field">
 										<textarea
-											placeholder={`Enter message for card ${index + 1}`}
+											placeholder={
+												formData.style === "simple-valentine"
+													? "Message shown after they say yes..."
+													: `Enter message for card ${index + 1}`
+											}
 											className="w-full px-4 py-3 pr-10 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-stone-600 placeholder:text-stone-400 bg-white min-h-[100px] resize-y"
 											value={card.message}
 											onChange={(e) =>
@@ -452,10 +529,11 @@ function Create() {
 										<button
 											onClick={() => handleAIGenerate(index, "message")}
 											disabled={aiLoading !== null}
-											className="absolute right-3 top-4 text-stone-400 hover:text-blue-500 transition-colors p-1"
+											className="absolute right-3 top-2 text-stone-400 hover:text-blue-500 transition-colors p-1"
 											title="Generate with AI"
 										>
-											{aiLoading?.index === index && aiLoading?.field === "message" ? (
+											{aiLoading?.index === index &&
+											aiLoading?.field === "message" ? (
 												<div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
 											) : (
 												<svg
@@ -476,29 +554,31 @@ function Create() {
 									</div>
 								</div>
 							))}
-							<div className="flex justify-center">
-								<button
-									onClick={addCard}
-									className="flex items-center gap-2 px-6 py-2 rounded-full border-2 border-stone-300 text-stone-500 hover:border-blue-500 hover:text-blue-500 transition-all font-medium group"
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										width="20"
-										height="20"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="2"
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										className="group-hover:rotate-90 duration-500"
+							{formData.style !== "simple-valentine" && (
+								<div className="flex justify-center">
+									<button
+										onClick={addCard}
+										className="flex items-center gap-2 px-6 py-2 rounded-full border-2 border-stone-300 text-stone-500 hover:border-blue-500 hover:text-blue-500 transition-all font-medium group"
 									>
-										<line x1="12" y1="5" x2="12" y2="19"></line>
-										<line x1="5" y1="12" x2="19" y2="12"></line>
-									</svg>
-									Add Card
-								</button>
-							</div>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="20"
+											height="20"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											className="group-hover:rotate-90 duration-500"
+										>
+											<line x1="12" y1="5" x2="12" y2="19"></line>
+											<line x1="5" y1="12" x2="19" y2="12"></line>
+										</svg>
+										Add Card
+									</button>
+								</div>
+							)}
 						</div>
 					)}
 					{selectedSection == 3 && (
@@ -507,7 +587,10 @@ function Create() {
 								Background Music
 							</h3>
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-								{musicOptions.map((option) => (
+								{(formData.style === "simple-valentine"
+									? valentineMusics
+									: birthdayMusics
+								).map((option) => (
 									<button
 										key={option.id}
 										onClick={() => {
@@ -577,7 +660,7 @@ function Create() {
 								<span className="circle4"></span>
 								<span className="circle5"></span>
 								<span className="text">
-									{isSubmitting ? "Submitting..." : "Submit"}
+									{isSubmitting ? "Saving" : "Create"}
 								</span>
 							</button>
 						)}

@@ -41,7 +41,7 @@ function Pages() {
 		fetchData();
 	}, [getToken, isLoaded, isSignedIn]);
 
-	// Auto-refresh if any card is still "Generating" (previewImage is empty)
+	// Auto-refresh if any card is still generating preview
 	useEffect(() => {
 		const hasIncomplete = [...birthdays, ...valentines].some(
 			(card) => !card.previewImage,
@@ -54,7 +54,44 @@ function Pages() {
 	}, [birthdays, valentines, loading]);
 
 	if (!isLoaded) {
-		return <div className="min-h-screen bg-transparent" />;
+		return (
+			<>
+				<section className="mb-12">
+					<div className="flex justify-between items-center mb-2">
+						<h2 className="text-3xl font-bold tracking-tight text-stone-900">
+							Birthday
+						</h2>
+					</div>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						{[1, 2].map((i) => (
+							<div key={i} className="flex flex-col gap-1.5 w-full">
+								<div className="aspect-video w-full bg-stone-100 animate-pulse rounded-2xl" />
+								<div className="px-2">
+									<div className="h-6 bg-stone-100 animate-pulse rounded-md" />
+								</div>
+							</div>
+						))}
+					</div>
+				</section>
+				<section className="mb-12">
+					<div className="flex justify-between items-center mb-2">
+						<h2 className="text-3xl font-bold tracking-tight text-stone-900">
+							Valentine
+						</h2>
+					</div>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						{[1].map((i) => (
+							<div key={i} className="flex flex-col gap-1.5 w-full">
+								<div className="aspect-video w-full bg-stone-100 animate-pulse rounded-2xl" />
+								<div className="px-2">
+									<div className="h-6 bg-stone-100 animate-pulse rounded-md" />
+								</div>
+							</div>
+						))}
+					</div>
+				</section>
+			</>
+		);
 	}
 
 	return (
@@ -68,23 +105,25 @@ function Pages() {
 					</div>
 
 					{loading ? (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-							{[1, 2, 3].map((i) => (
-								<div
-									key={i}
-									className="h-48 bg-stone-100 animate-pulse rounded-2xl"
-								/>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+							{[1, 2].map((i) => (
+								<div key={i} className="flex flex-col gap-1.5 w-full">
+									<div className="aspect-video w-full bg-stone-100 animate-pulse rounded-2xl" />
+									<div className="px-2">
+										<div className="h-6 bg-stone-100 animate-pulse rounded-md" />
+									</div>
+								</div>
 							))}
 						</div>
 					) : birthdays.length > 0 ? (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 							{birthdays.map((card) => (
 								<Link
 									key={card._id}
 									to={`/birthday/${card.slug}`}
-									className="group bg-white border border-stone-200 rounded-3xl overflow-hidden hover:border-blue-400 transition-all duration-300 shadow-sm hover:shadow-xl"
+									className="group flex flex-col gap-1 w-full"
 								>
-									<div className="aspect-video w-full overflow-hidden bg-stone-100 relative">
+									<div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-stone-100 border border-stone-200 group-hover:border-blue-400 transition-all duration-300">
 										{card.previewImage ? (
 											<img
 												src={card.previewImage}
@@ -92,37 +131,49 @@ function Pages() {
 												className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
 											/>
 										) : (
-											<div className="w-full h-full flex items-center justify-center">
-												<span className="text-xs font-medium bg-white/80 backdrop-blur px-3 py-1 rounded-full text-stone-600 border border-stone-200 shadow-sm animate-pulse">
-													Generating Preview...
-												</span>
+											<div className="w-full h-full flex items-center justify-center font-medium text-stone-600">
+												Generating Preview...
 											</div>
 										)}
 									</div>
-									<div className="p-6">
-										<div className="flex justify-between items-start mb-4">
-											<span className="text-2xl">🎂</span>
-											<span className="text-xs text-stone-400">
-												{card.createdAt
-													? new Date(card.createdAt).toLocaleDateString()
-													: ""}
-											</span>
-										</div>
-										<h3 className="text-xl font-bold text-stone-900 mb-1">
-											For {card.firstname} {card.lastname}
-										</h3>
-										<p className="text-sm text-stone-500 line-clamp-2">
-											{card.cards?.[0]?.message || "No message provided."}
-										</p>
+									<div className="flex justify-between items-center w-full px-4">
+										<span className="text-lg font-bold text-stone-900">
+											{card.firstname} {card.lastname}
+										</span>
+										<span className="text-xs text-stone-400 text-end">
+											{card.createdAt
+												? new Date(card.createdAt).toLocaleDateString()
+												: ""}
+										</span>
 									</div>
 								</Link>
 							))}
 						</div>
 					) : (
-						<div className="text-center py-12 bg-stone-50 rounded-2xl border-2 border-stone-200">
-							<p className="text-stone-500 mb-4">
-								No birthday cards created yet
-							</p>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+							<Link to="/create" className="group flex flex-col gap-1 w-full">
+								<div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-stone-50 border-2 border-dashed border-stone-200 group-hover:border-blue-400 group-hover:bg-blue-50/50 transition-all duration-300 flex flex-col items-center justify-center gap-3">
+									<div className="p-3 rounded-full bg-white border border-stone-200 group-hover:scale-110 group-hover:text-blue-600 transition-all duration-300">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="24"
+											height="24"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2.5"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										>
+											<path d="M5 12h14" />
+											<path d="M12 5v14" />
+										</svg>
+									</div>
+									<p className="font-medium text-stone-500 group-hover:text-blue-600 transition-colors">
+										Create Birthday Card
+									</p>
+								</div>
+							</Link>
 						</div>
 					)}
 				</section>
@@ -135,23 +186,25 @@ function Pages() {
 					</div>
 
 					{loading ? (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 							{[1].map((i) => (
-								<div
-									key={i}
-									className="h-48 bg-stone-100 animate-pulse rounded-2xl"
-								/>
+								<div key={i} className="flex flex-col gap-1.5 w-full">
+									<div className="aspect-video w-full bg-stone-100 animate-pulse rounded-2xl" />
+									<div className="px-2">
+										<div className="h-6 bg-stone-100 animate-pulse rounded-md" />
+									</div>
+								</div>
 							))}
 						</div>
 					) : valentines.length > 0 ? (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 							{valentines.map((card) => (
 								<Link
 									key={card._id}
 									to={`/valentine/${card.slug}`}
-									className="group bg-white border border-stone-200 rounded-3xl overflow-hidden hover:border-blue-400 transition-all duration-300 shadow-sm hover:shadow-xl"
+									className="group flex flex-col gap-1 w-full"
 								>
-									<div className="aspect-video w-full overflow-hidden bg-stone-100 relative">
+									<div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-stone-100 border border-stone-200 group-hover:border-blue-400 transition-all duration-300">
 										{card.previewImage ? (
 											<img
 												src={card.previewImage}
@@ -159,35 +212,49 @@ function Pages() {
 												className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
 											/>
 										) : (
-											<div className="w-full h-full flex items-center justify-center">
-												<span className="text-xs font-medium bg-white/80 backdrop-blur px-3 py-1 rounded-full text-stone-600 border border-stone-200 shadow-sm animate-pulse">
-													Generating Preview...
-												</span>
+											<div className="w-full h-full flex items-center justify-center font-medium text-stone-600">
+												Generating Preview...
 											</div>
 										)}
 									</div>
-									<div className="p-6">
-										<div className="flex justify-between items-start mb-4">
-											<span className="text-2xl">💖</span>
-											<span className="text-xs text-stone-400">
-												{card.createdAt
-													? new Date(card.createdAt).toLocaleDateString()
-													: ""}
-											</span>
-										</div>
-										<h3 className="text-xl font-bold text-stone-900 mb-1">
-											For {card.nickname}
-										</h3>
-										<p className="text-sm text-stone-500 line-clamp-2">
-											{card.cards?.[0]?.message || "No message provided."}
-										</p>
+									<div className="flex justify-between items-center w-full px-4">
+										<span className="text-lg font-bold text-stone-900">
+											{card.nickname}
+										</span>
+										<span className="text-xs text-stone-400 text-end">
+											{card.createdAt
+												? new Date(card.createdAt).toLocaleDateString()
+												: ""}
+										</span>
 									</div>
 								</Link>
 							))}
 						</div>
 					) : (
-						<div className="text-center py-12 bg-stone-50 rounded-2xl border-2 border-stone-200">
-							<p className="text-stone-500">No valentine cards created yet</p>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+							<Link to="/create" className="group flex flex-col gap-1 w-full">
+								<div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-stone-50 border-2 border-dashed border-stone-200 group-hover:border-blue-400 group-hover:bg-blue-50/50 transition-all duration-300 flex flex-col items-center justify-center gap-3">
+									<div className="p-3 rounded-full bg-white border border-stone-200 group-hover:scale-110 group-hover:text-blue-600 transition-all duration-300">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="24"
+											height="24"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2.5"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+										>
+											<path d="M5 12h14" />
+											<path d="M12 5v14" />
+										</svg>
+									</div>
+									<p className="font-medium text-stone-500 group-hover:text-blue-600 transition-colors">
+										Create Valentine Card
+									</p>
+								</div>
+							</Link>
 						</div>
 					)}
 				</section>

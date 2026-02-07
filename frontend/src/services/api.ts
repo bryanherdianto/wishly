@@ -35,10 +35,10 @@ export interface ValentineCard {
 	slug?: string;
 	previewImage?: string;
 	music: string;
-	cards: {
+	card: {
 		title: string;
 		message: string;
-	}[];
+	};
 	createdAt?: string;
 }
 
@@ -63,7 +63,10 @@ export const birthdayCardService = {
 		const response = await api.post("/birthday/cards", card);
 		return response.data;
 	},
-	update: async (slug: string, card: Partial<BirthdayCard>): Promise<BirthdayCard> => {
+	update: async (
+		slug: string,
+		card: Partial<BirthdayCard>,
+	): Promise<BirthdayCard> => {
 		const response = await api.put(`/birthday/cards/${slug}`, card);
 		return response.data;
 	},
@@ -85,7 +88,10 @@ export const valentineCardService = {
 		const response = await api.post("/valentine/cards", card);
 		return response.data;
 	},
-	update: async (slug: string, card: Partial<ValentineCard>): Promise<ValentineCard> => {
+	update: async (
+		slug: string,
+		card: Partial<ValentineCard>,
+	): Promise<ValentineCard> => {
 		const response = await api.put(`/valentine/cards/${slug}`, card);
 		return response.data;
 	},
@@ -95,9 +101,11 @@ export const valentineCardService = {
 };
 
 export const aiService = {
-	generate: async (prompt: string, type: "title" | "message"): Promise<string> => {
+	generate: async (
+		prompt: string,
+		type: "title" | "message",
+	): Promise<string> => {
 		const response = await api.post("/ai/generate", { prompt, type });
 		return response.data.text;
 	},
 };
-

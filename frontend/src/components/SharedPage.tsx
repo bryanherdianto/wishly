@@ -17,7 +17,6 @@ function SharedPage() {
 	const [data, setData] = useState<BirthdayCard | ValentineCard | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(false);
-	const [isPlaying, setIsPlaying] = useState(false);
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 
 	const isBirthday = location.pathname.startsWith("/birthday/");
@@ -43,10 +42,21 @@ function SharedPage() {
 
 				// Prepare audio if music is set
 				if (result.music && result.music !== "none") {
-					const category = isBirthday ? "birthday" : "valentine";
-					const audio = new Audio(`/${category}/${result.music}.mp3`);
+					const audio = new Audio(`/musics/${result.music}.mp3`);
 					audio.loop = true;
 					audioRef.current = audio;
+
+					const attemptPlay = () => {
+						if (audioRef.current && audioRef.current.paused) {
+							audioRef.current.play().catch(() => {
+								console.log("Music playback is not played automatically.");
+							});
+						}
+					};
+
+					attemptPlay();
+					window.addEventListener("click", attemptPlay, { once: true });
+					window.addEventListener("touchstart", attemptPlay, { once: true });
 				}
 			} catch (err) {
 				console.error("Error fetching shared page:", err);
@@ -62,17 +72,10 @@ function SharedPage() {
 			if (audioRef.current) {
 				audioRef.current.pause();
 			}
+			window.removeEventListener("click", () => {});
+			window.removeEventListener("touchstart", () => {});
 		};
 	}, [slug, isBirthday]);
-
-	const handlePlayMusic = () => {
-		if (audioRef.current) {
-			audioRef.current
-				.play()
-				.then(() => setIsPlaying(true))
-				.catch((err) => console.log("Audio playback error:", err));
-		}
-	};
 
 	if (loading) {
 		return (
@@ -105,39 +108,7 @@ function SharedPage() {
 		}
 	};
 
-	return (
-		<div className="relative min-h-screen">
-			{!isPlaying && data.music && data.music !== "none" && (
-				<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-					<button
-						onClick={handlePlayMusic}
-						className="px-8 py-4 bg-white text-black rounded-full font-bold text-xl shadow-2xl hover:scale-105 transition-transform animate-bounce"
-					>
-						Tap to open your surprise 🎁
-					</button>
-				</div>
-			)}
-
-			{renderTemplate()}
-
-			{isPlaying && (
-				<button
-					onClick={() => {
-						if (audioRef.current) {
-							if (audioRef.current.paused) {
-								audioRef.current.play();
-							} else {
-								audioRef.current.pause();
-							}
-						}
-					}}
-					className="fixed bottom-6 right-6 z-50 p-4 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-white hover:bg-white/40 transition-colors"
-				>
-					🎵
-				</button>
-			)}
-		</div>
-	);
+	return <div className="relative min-h-screen">{renderTemplate()}</div>;
 }
 
 export default SharedPage;

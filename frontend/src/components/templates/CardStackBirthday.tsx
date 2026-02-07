@@ -57,19 +57,14 @@ export default function CardStack({ data }: { data: any }) {
 				{data.cards.map((card: any, i: number) => {
 					const targetScale = 1 - (data.cards.length - i) * 0.05;
 					return (
-						<Card
-							key={i}
-							index={i}
-							card={card}
-							targetScale={targetScale}
-						/>
+						<Card key={i} index={i} card={card} targetScale={targetScale} />
 					);
 				})}
 			</div>
 			<div className="text-7xl font-bold font-caveat text-center pb-40">
 				Happy Birthday {data.firstname}!
 			</div>
-			<BirthdayCake name={data.firstname} />
+			<BirthdayCake />
 		</>
 	);
 }

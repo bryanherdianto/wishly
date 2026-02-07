@@ -16,6 +16,30 @@ function App() {
 		location.pathname.startsWith("/valentine/") ||
 		location.pathname.startsWith("/templates/");
 
+	const mockBirthdayData = {
+		firstname: "John",
+		lastname: "Doe",
+		music: "none",
+		style: "card-stack",
+		cards: [
+			{
+				title: "Happy Birthday!",
+				message: "Have an amazing day filled with joy.",
+			},
+			{
+				title: "Special Day",
+				message: "Wishing you all the best on your birthday.",
+			},
+		],
+	};
+
+	const mockValentineData = {
+		nickname: "Valentine",
+		music: "none",
+		style: "simple-valentine",
+		card: { title: "To my Valentine", message: "You make every day special." },
+	};
+
 	return (
 		<div className="app-container min-h-screen flex flex-col">
 			{!isImmersive && (
@@ -79,11 +103,17 @@ function App() {
 					<Route path="/pages" element={<Pages />} />
 					<Route path="/birthday/:slug" element={<SharedPage />} />
 					<Route path="/valentine/:slug" element={<SharedPage />} />
-					<Route path="/templates/card-stack" element={<CardStack data={null} />} />
-					<Route path="/templates/sticky-pixel" element={<StickyPixel data={null} />} />
+					<Route
+						path="/templates/card-stack"
+						element={<CardStack data={mockBirthdayData} />}
+					/>
+					<Route
+						path="/templates/sticky-pixel"
+						element={<StickyPixel data={mockBirthdayData} />}
+					/>
 					<Route
 						path="/templates/simple-valentine"
-						element={<SimpleValentine data={null} />}
+						element={<SimpleValentine data={mockValentineData} />}
 					/>
 					<Route
 						path="/sign-in/*"

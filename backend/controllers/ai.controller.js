@@ -20,7 +20,7 @@ exports.generateContent = async (req, res) => {
 
 		const result = await model.generateContent(systemPrompt + prompt);
 		const response = await result.response;
-		// Clean up any potential quotes or leading/trailing whitespace the AI might include
+		// Clean up any potential quotes or trailing whitespace the AI might include
 		const text = response.text().trim().replace(/^["']|["']$/g, '');
 
 		res.json({ text });

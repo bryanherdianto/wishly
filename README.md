@@ -12,6 +12,8 @@
   <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" />
   <img src="https://img.shields.io/badge/Clerk-6C47FF?style=for-the-badge&logo=clerk&logoColor=white" />
   <img src="https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white" />
+  <img src="https://img.shields.io/badge/Puppeteer-40B5A4?style=for-the-badge&logo=puppeteer&logoColor=white" />
+  <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white" />
 </p>
 
 A full-stack web application to create and share immersive, personalized surprise pages for life's special moments.
@@ -85,14 +87,14 @@ CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 CLERK_SECRET_KEY=your_clerk_secret_key
 CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-FRONTEND_URL=http://localhost:5173
+FRONTEND_URL=your_frontend_url
 ```
 
 ### Frontend (`/frontend/.env`)
 
 ```env
 VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=your_backend_api_url
 ```
 
 ## Usage

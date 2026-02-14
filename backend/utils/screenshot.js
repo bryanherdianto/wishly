@@ -1,6 +1,7 @@
-const puppeteer = require('puppeteer');
-const cloudinary = require('cloudinary').v2;
-require('dotenv').config();
+const puppeteer = require("puppeteer-core");
+const chromium = require("@sparticuz/chromium");
+const cloudinary = require("cloudinary").v2;
+require("dotenv").config();
 
 // Configure Cloudinary if environment variables are present
 if (process.env.CLOUDINARY_URL) {
@@ -22,23 +23,25 @@ if (process.env.CLOUDINARY_URL) {
 const generateScreenshot = async (slug, category) => {
 	// Prevent running if no Cloudinary config exists
 	if (!process.env.CLOUDINARY_URL && !process.env.CLOUDINARY_CLOUD_NAME) {
-		console.warn('Screenshot generation skipped: Cloudinary not configured.');
+		console.warn("Screenshot generation skipped: Cloudinary not configured.");
 		return null;
 	}
 
 	let browser;
 	try {
 		browser = await puppeteer.launch({
-			args: ['--no-sandbox', '--disable-setuid-sandbox'],
-			// Useful for running in some serverless environments
-			headless: 'new',
+			args: chromium.args,
+			defaultViewport: chromium.defaultViewport,
+			executablePath: await chromium.executablePath(),
+			headless: chromium.headless,
+			ignoreHTTPSErrors: true,
 		});
 
 		const page = await browser.newPage();
 		await page.setViewport({ width: 1200, height: 630 });
 
 		// Use the frontend URL from environment or fallback to localhost
-		const frontendBaseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+		const frontendBaseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 		const targetUrl = `${frontendBaseUrl}/${category}/${slug}`;
 
 		console.log(`Taking screenshot of: ${targetUrl}`);
@@ -46,19 +49,21 @@ const generateScreenshot = async (slug, category) => {
 		// Navigate to the page
 		// Use 'networkidle2' instead of 'networkidle0' for dev environments (Vite HMR can block networkidle0)
 		try {
-			await page.goto(targetUrl, { 
-				waitUntil: ['networkidle2', 'domcontentloaded'], 
-				timeout: 20000 
+			await page.goto(targetUrl, {
+				waitUntil: ["networkidle2", "domcontentloaded"],
+				timeout: 20000,
 			});
 		} catch (err) {
-			console.warn(`Navigation timeout for ${targetUrl}, attempting to screenshot anyway...`);
+			console.warn(
+				`Navigation timeout for ${targetUrl}, attempting to screenshot anyway...`,
+			);
 		}
 
 		// Wait an extra 3 seconds for animations (Framer Motion) and images to settle
 		await new Promise((resolve) => setTimeout(resolve, 3000));
 
 		const imageBuffer = await page.screenshot({
-			type: 'jpeg',
+			type: "jpeg",
 			quality: 80,
 		});
 
@@ -68,14 +73,14 @@ const generateScreenshot = async (slug, category) => {
 		const uploadResult = await new Promise((resolve, reject) => {
 			const uploadStream = cloudinary.uploader.upload_stream(
 				{
-					folder: 'wishly_previews',
+					folder: "wishly_previews",
 					public_id: `${category}_${slug}`,
 					overwrite: true,
 				},
 				(error, result) => {
 					if (error) reject(error);
 					else resolve(result);
-				}
+				},
 			);
 			uploadStream.end(imageBuffer);
 		});
@@ -83,7 +88,7 @@ const generateScreenshot = async (slug, category) => {
 		console.log(`Screenshot uploaded successfully: ${uploadResult.secure_url}`);
 		return uploadResult.secure_url;
 	} catch (error) {
-		console.error('Screenshot generation failed:', error);
+		console.error("Screenshot generation failed:", error);
 		return null;
 	} finally {
 		if (browser) {

@@ -28,27 +28,21 @@ exports.createBirthday = async (req, res) => {
 		const newCard = new Birthday({ ...req.body, userId: req.auth().userId });
 		const savedCard = await newCard.save();
 
-		// Run screenshot generation in background
-		console.log(`Starting background screenshot for card: ${savedCard.slug}`);
-		generateScreenshot(savedCard.slug, "birthday")
-			.then(async (url) => {
-				if (url) {
-					console.log(
-						`Updating card ${savedCard.slug} with preview image: ${url}`,
-					);
-					await Birthday.findByIdAndUpdate(savedCard._id, {
-						previewImage: url,
-					});
-				} else {
-					console.warn(`No preview URL generated for ${savedCard.slug}`);
-				}
-			})
-			.catch((err) => {
-				console.error(
-					`Background screenshot error for ${savedCard.slug}:`,
-					err,
+		// We must await the screenshot on Vercel, otherwise it may not complete.
+		console.log(`Generating screenshot for card: ${savedCard.slug}`);
+		try {
+			const url = await generateScreenshot(savedCard.slug, "birthday");
+			if (url) {
+				console.log(
+					`Updating card ${savedCard.slug} with preview image: ${url}`,
 				);
-			});
+				await Birthday.findByIdAndUpdate(savedCard._id, { previewImage: url });
+				// Update the object to return to user
+				savedCard.previewImage = url;
+			}
+		} catch (err) {
+			console.error(`Screenshot error for ${savedCard.slug}:`, err);
+		}
 
 		res.status(201).json(savedCard);
 	} catch (error) {
@@ -69,13 +63,16 @@ exports.getBirthdayById = async (req, res) => {
 
 exports.updateBirthday = async (req, res) => {
 	try {
-		const updatedCard = await Birthday.findByIdAndUpdate(
-			req.params.id,
+		// Secure: Ensure only the owner can update the card
+		const updatedCard = await Birthday.findOneAndUpdate(
+			{ _id: req.params.id, userId: req.auth().userId },
 			req.body,
 			{ new: true },
 		);
 		if (!updatedCard)
-			return res.status(404).json({ message: "Birthday card not found" });
+			return res
+				.status(404)
+				.json({ message: "Birthday card not found or unauthorized" });
 		res.json(updatedCard);
 	} catch (error) {
 		res.status(400).json({ message: error.message });
@@ -84,9 +81,15 @@ exports.updateBirthday = async (req, res) => {
 
 exports.deleteBirthday = async (req, res) => {
 	try {
-		const deletedCard = await Birthday.findByIdAndDelete(req.params.id);
+		// Secure: Ensure only the owner can delete the card
+		const deletedCard = await Birthday.findOneAndDelete({
+			_id: req.params.id,
+			userId: req.auth().userId,
+		});
 		if (!deletedCard)
-			return res.status(404).json({ message: "Birthday card not found" });
+			return res
+				.status(404)
+				.json({ message: "Birthday card not found or unauthorized" });
 		res.json({ message: "Birthday card deleted successfully" });
 	} catch (error) {
 		res.status(500).json({ message: error.message });

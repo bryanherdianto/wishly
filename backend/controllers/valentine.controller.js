@@ -20,29 +20,21 @@ exports.createValentine = async (req, res) => {
 		});
 		const savedCard = await newCard.save();
 
-		// Run screenshot generation in background
-		console.log(
-			`Starting background screenshot for valentine: ${savedCard.slug}`,
-		);
-		generateScreenshot(savedCard.slug, "valentine")
-			.then(async (url) => {
-				if (url) {
-					console.log(
-						`Updating valentine ${savedCard.slug} with preview image: ${url}`,
-					);
-					await Valentine.findByIdAndUpdate(savedCard._id, {
-						previewImage: url,
-					});
-				} else {
-					console.warn(`No preview URL generated for ${savedCard.slug}`);
-				}
-			})
-			.catch((err) => {
-				console.error(
-					`Background screenshot error for ${savedCard.slug}:`,
-					err,
+		// We must await the screenshot on Vercel, otherwise it may not complete.
+		console.log(`Generating screenshot for valentine: ${savedCard.slug}`);
+		try {
+			const url = await generateScreenshot(savedCard.slug, "valentine");
+			if (url) {
+				console.log(
+					`Updating valentine ${savedCard.slug} with preview image: ${url}`,
 				);
-			});
+				await Valentine.findByIdAndUpdate(savedCard._id, { previewImage: url });
+				// Update object to return to user
+				savedCard.previewImage = url;
+			}
+		} catch (err) {
+			console.error(`Screenshot error for ${savedCard.slug}:`, err);
+		}
 
 		res.status(201).json(savedCard);
 	} catch (error) {
@@ -74,13 +66,16 @@ exports.getValentineById = async (req, res) => {
 
 exports.updateValentine = async (req, res) => {
 	try {
-		const updatedCard = await Valentine.findByIdAndUpdate(
-			req.params.id,
+		// Secure: Ensure only the owner can update the card
+		const updatedCard = await Valentine.findOneAndUpdate(
+			{ _id: req.params.id, userId: req.auth().userId },
 			req.body,
 			{ new: true },
 		);
 		if (!updatedCard)
-			return res.status(404).json({ message: "Valentine card not found" });
+			return res
+				.status(404)
+				.json({ message: "Valentine card not found or unauthorized" });
 		res.json(updatedCard);
 	} catch (error) {
 		res.status(400).json({ message: error.message });
@@ -89,9 +84,15 @@ exports.updateValentine = async (req, res) => {
 
 exports.deleteValentine = async (req, res) => {
 	try {
-		const deletedCard = await Valentine.findByIdAndDelete(req.params.id);
+		// Secure: Ensure only the owner can delete the card
+		const deletedCard = await Valentine.findOneAndDelete({
+			_id: req.params.id,
+			userId: req.auth().userId,
+		});
 		if (!deletedCard)
-			return res.status(404).json({ message: "Valentine card not found" });
+			return res
+				.status(404)
+				.json({ message: "Valentine card not found or unauthorized" });
 		res.json({ message: "Valentine card deleted successfully" });
 	} catch (error) {
 		res.status(500).json({ message: error.message });
